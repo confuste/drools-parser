@@ -1,0 +1,3 @@
+rootProject.name = 'com.alejandrofuster.droolsparser'
+include 'parser'
+
