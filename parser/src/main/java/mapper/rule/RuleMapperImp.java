@@ -1,7 +1,12 @@
 package mapper.rule;
 
 import drools.rule.DroolsRule;
-import org.drools.compiler.lang.descr.RuleDescr;
+import drools.rule.LeftHandSide;
+import drools.rule.LhsCondition;
+import drools.rule.Metadata;
+import org.drools.compiler.lang.descr.*;
+
+import java.util.*;
 
 /**
  * Created by alex on 21/6/18.
@@ -11,6 +16,56 @@ public class RuleMapperImp implements RuleMapper {
 
     @Override
     public DroolsRule ruleDescrToRuleDrools(RuleDescr ruleDescr) {
-        return null;
+
+        DroolsRule droolsRule = new DroolsRule();
+        droolsRule.setName(ruleDescr.getName());
+        droolsRule.setSalience(ruleDescr.getSalience());
+        droolsRule.setNamespace(ruleDescr.getNamespace());
+        droolsRule.setMetadata(this.mapMetadata(ruleDescr));
+        droolsRule.setLeftHandSide(this.mapLeftHandSide(ruleDescr.getLhs()));
+
+        //TODO map consequence
+        ruleDescr.getConsequence();
+
+        return droolsRule;
     }
+
+    private Metadata mapMetadata(RuleDescr ruleDescr){
+
+        Metadata metadata = new Metadata();
+
+        for(String key : ruleDescr.getAnnotationNames()){
+            metadata.addMetadata(key, ruleDescr.getAnnotation(key).getSingleValueAsString());
+        }
+
+        return metadata;
+    }
+
+    private LeftHandSide mapLeftHandSide(AndDescr andDescr){
+        List<BaseDescr> descrList = andDescr.getDescrs();
+
+        LeftHandSide leftHandSide = new LeftHandSide();
+        LhsCondition lhsCondition;
+        PatternDescr patternDescr;
+
+        List<BaseDescr> exprConstraintDescrList;
+
+        for(BaseDescr baseDescr : descrList){
+            patternDescr = (PatternDescr) baseDescr;
+            lhsCondition = new LhsCondition();
+            lhsCondition.setId(patternDescr.getIdentifier());
+            lhsCondition.setObjectType(patternDescr.getObjectType());
+
+
+            exprConstraintDescrList = Collections.unmodifiableList(patternDescr.getSlottedConstraints());
+            for(BaseDescr exprConstraint : exprConstraintDescrList){
+                lhsCondition.addConstraint(((ExprConstraintDescr)exprConstraint).getExpression());
+            }
+
+            leftHandSide.addLhsCondition(lhsCondition);
+        }
+
+        return leftHandSide;
+    }
+
 }
