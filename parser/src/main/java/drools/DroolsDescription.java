@@ -1,6 +1,8 @@
 package drools;
 
 import drools.rule.DroolsRule;
+import mapper.rule.RuleMapper;
+import mapper.rule.RuleMapperImp;
 import org.drools.compiler.lang.descr.ImportDescr;
 import org.drools.compiler.lang.descr.PackageDescr;
 import org.drools.compiler.lang.descr.RuleDescr;
@@ -14,9 +16,11 @@ import java.util.List;
 public class DroolsDescription {
 
     private PackageDescr packageDescr;
+    private RuleMapper ruleMapper;
 
     public DroolsDescription(DroolsParser droolsParser){
         this.packageDescr = droolsParser.getPackageDescr();
+        this.ruleMapper = new RuleMapperImp();
     }
 
 
@@ -37,11 +41,8 @@ public class DroolsDescription {
 
         List<RuleDescr> ruleDescrList = this.packageDescr.getRules();
 
-        for (RuleDescr rule : ruleDescrList){
-
-
-
-
+        for (RuleDescr ruleDescr : ruleDescrList){
+            droolsRulesList.add(this.ruleMapper.ruleDescrToRuleDrools(ruleDescr));
         }
 
         return droolsRulesList;

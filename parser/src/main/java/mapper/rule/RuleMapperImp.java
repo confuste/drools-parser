@@ -1,9 +1,6 @@
 package mapper.rule;
 
-import drools.rule.DroolsRule;
-import drools.rule.LeftHandSide;
-import drools.rule.LhsCondition;
-import drools.rule.Metadata;
+import drools.rule.*;
 import org.drools.compiler.lang.descr.*;
 
 import java.util.*;
@@ -21,13 +18,21 @@ public class RuleMapperImp implements RuleMapper {
         droolsRule.setName(ruleDescr.getName());
         droolsRule.setSalience(ruleDescr.getSalience());
         droolsRule.setNamespace(ruleDescr.getNamespace());
+        droolsRule.setAttribute(this.mapAttribute(ruleDescr));
         droolsRule.setMetadata(this.mapMetadata(ruleDescr));
         droolsRule.setLeftHandSide(this.mapLeftHandSide(ruleDescr.getLhs()));
-
-        //TODO map consequence
-        ruleDescr.getConsequence();
+        droolsRule.setConsequence(new Consequence(ruleDescr.getConsequence().toString()));
 
         return droolsRule;
+    }
+
+    private Attribute mapAttribute(RuleDescr ruleDescr){
+        Attribute attribute = new Attribute();
+
+        for (Map.Entry<String, AttributeDescr> entry : ruleDescr.getAttributes().entrySet()) {
+            attribute.addAttribute(entry.getKey(), entry.getValue().getValueString());
+        }
+        return attribute;
     }
 
     private Metadata mapMetadata(RuleDescr ruleDescr){

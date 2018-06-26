@@ -9,6 +9,7 @@ public class DroolsRule {
     private String name;
     private String salience;
     private String namespace;
+    private Attribute attribute;
     private Metadata metadata;
     private LeftHandSide leftHandSide;
     private Consequence consequence;
@@ -24,6 +25,14 @@ public class DroolsRule {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Attribute getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(Attribute attribute) {
+        this.attribute = attribute;
     }
 
     public Metadata getMetadata() {
