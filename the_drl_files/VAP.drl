@@ -1,0 +1,1146 @@
+
+rule "IsInvalidSputumCulture"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(1-3)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Analyzes if sputum culture of patient is valid by checking if patient has been on atibiotics recently or failing therapy with et Suction")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(GenericAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+  no-loop
+  salience -100 
+  agenda-group "generic"
+    when
+        $patient : Patient (onAntibiotics == true || etSuction == false )
+        
+    then
+        System.out.println( "Generic Alert: Sputum culture of patient " + $patient.name +  " possibly not valid" );
+        System.out.println( "Audit Information: "  + " @clinicalAction "+drools.getRule().getMetaData().get("clinicalAction") );
+        
+end
+
+
+rule "SputumCultureResultsKnown"
+  
+  // rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(5-6)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Analyzes if sputum culture results (agent) are available and sends geenric alert to alert that empiric treatment should be narrowed asap")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(GenericAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+  
+  no-loop 
+  salience -100 
+  agenda-group "generic"
+    when
+        $patient : Patient (etCultureAgent != "")
+    then
+        System.out.println( "Generic Alert: Sputum culture results already available, Narrow down treatment of patient " + $patient.name + " as soon as possible" );
+        System.out.println( "Audit Information: "  + " @clinicalAction "+drools.getRule().getMetaData().get("clinicalAction") );
+end
+    
+rule "UseDifferentAgentAntibiotic"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(7-8)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Analyzes if patient is on antibiotics or has been recently and advises to use an antibiotic with an agent of a different type")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(GenericAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    no-loop
+    lock-on-active
+    salience -100 
+    agenda-group "generic"
+    when
+        $patient : Patient  (onAntibiotics == true || onAntibioticsRecently ==  true)
+    then
+        System.out.println( "Generic Alert: Patient " + $patient.name + " has been or is on antibiotics treatment, choose an antibiotic from a different class than the ones used before" );
+end
+
+
+// CPIS rules
+
+rule "CPISHighTemperature"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 1 column 1)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's temperature and if within a range adds 0 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+  lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (temperature > 36.5 && temperature <= 38.4)
+    then
+        modify ($patient) {CPIS +=0};
+        //$patient.CPIS += 0;
+        //update( $patient );
+        System.out.println( "CPIS NOT changed :High Temp, CPI of patient " + $patient.name + " increased by 0, final value = " + $patient.CPIS);
+end 
+
+
+
+rule "CPISVeryHighTemperature"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 1 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's temperature and if within a range adds 1 point to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (temperature > 38.4 && temperature <= 38.9)
+    then
+        //$patient.CPIS += 1;
+        //update( $patient );
+        modify ($patient) {CPIS +=1};
+        System.out.println( "CPIS changed :Very High temp, CPI of patient " + $patient.name + " increased by 1, current value = " + $patient.CPIS);
+end
+
+rule "CPISExtremeTemperature"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 1 column 3)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's temperature and if within a range adds 2 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (temperature > 38.9 || temperature <= 36.4)
+    then
+        //$patient.CPIS += 2;
+        //update( $patient );
+        modify ($patient) {CPIS +=2};
+        System.out.println( "CPIS changed :Extreme temp, CPI of patient " + $patient.name + " increased by 2, current value = " + $patient.CPIS);
+        System.out.println( "Audit Information: "  + " @clinicalAction "+drools.getRule().getMetaData().get("clinicalAction") );
+end
+
+rule "CPISpWBCMedium"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 2 column 1)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's peripheral WBC and if within 4000-11000 adds 0 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (pWBC >= 4000 && pWBC <= 11000)
+    then
+        //$patient.CPIS += 0;
+        //update( $patient );
+        modify ($patient) {CPIS += 0};
+        System.out.println( "CPIS changed :Medium pwB, CPI of patient " + $patient.name + " increased by 0, current value = " + $patient.CPIS);
+end
+
+rule "CPISExtremepWBC"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 2 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's peripheral WBC and if within less than 4000 or higher than 11000 adds 1 point to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100
+    no-loop
+    agenda-group "cpis"
+    when
+         $patient: Patient (pWBC < 4000 ||  pWBC > 11000)
+    then
+         
+         modify ($patient) {CPIS += 1};
+         System.out.println( "CPIS changed :Extreme pWBC, CPI of patient " + $patient.name + " increased by 1, current value = " + $patient.CPIS);
+end
+
+// rule to add one extra point if 50% off bands
+     
+rule "CPISVeryExtremepWBC"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 2 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's peripheral WBC and if within less than 2000 or higher than 16500 adds 1 extra point to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (pWBC < 2000 ||  pWBC > 16500)
+    then
+        
+        modify ($patient) {CPIS += 1};
+        System.out.println( "Very extreme pWBC, CPI of patient " + $patient.name + " increased by 1, current value = " + $patient.CPIS);
+        
+end
+
+
+// rule to add cero points if no tracheal secretions in place
+rule "CPISNoTrachealSecretion"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 3 column 1)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's tracheal secretions and if none adds 0 point to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (trachealSecretions == "None")
+    then
+        modify ($patient) {CPIS += 0};
+        System.out.println( "CPIS changed :No tracheal secretion, CPI of patient " + $patient.name + " increased by 0, current value = " + $patient.CPIS);
+        
+end
+
+
+
+// rule to add 1 point to CPIS is tracheal secretions are non-purulent
+rule "CPISNoPurulentTrachealSecretion"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 3 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's tracheal secretions and if non-purulent secretions found adds 1 point to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (trachealSecretions == "Non-purulent")
+    then
+        modify ($patient) {CPIS +=1};
+        System.out.println( "CPIS changed :Non purulent tracheal secretion, CPI of patient " + $patient.name + " increased by 1, current value = " + $patient.CPIS);
+        
+end
+
+// rule to add 2 points to CPIS is tracheal secretions are purulent
+rule "CPISPurulentTrachealSecretion"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 3 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's tracheal secretions and if purulent secretions found adds 2 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (trachealSecretions == "Purulent")
+    then
+        modify ($patient) {CPIS +=2};
+        System.out.println( "CPIS changed :Purulent tracheal secretion, CPI of patient " + $patient.name + " increased by 2, current value = " + $patient.CPIS);
+        
+end
+
+ // if chest Xray shows no infiltrates, no points are added
+rule "CPISNoInfiltrateChestXRay"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 4 column 1)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's chest X rays and if no infiltrates found adds 0 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient : Patient (chestXray == "No Infiltrate")
+    then
+        modify ($patient) {CPIS +=0};
+        System.out.println( "CPIS changed :No infiltrate chest X ray, CPI of patient " + $patient.name + " increased by 0, current value = " + $patient.CPIS);
+end
+
+// if chest XRay shows diffuse or patchy infiltrates, add 1 point
+rule "CPISDiffuseOrPatchyInfiltratesChestXRay"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 4 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's chest X rays and if diffuse or patchy infiltrates found adds 1 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (chestXray == "Diffuse or Patchy Infiltrates")
+    then
+        modify ($patient) {CPIS +=1};
+        System.out.println( "CPIS changed :Diffuse or patchy infiltrates chest X ray, CPI of patient " + $patient.name + " increased by 1, current value = " + $patient.CPIS);
+        
+end
+
+// if chest Xray shows localized infiltrates add 2 points
+rule "CPISLocalizedInfiltrateChestXRay"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 4 column 3)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's chest X rays and if localized infiltrates found adds 2 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+     lock-on-active
+     salience 100 
+     no-loop
+     agenda-group "cpis"
+    when
+        $patient: Patient (chestXray == "Localized Infiltrates")
+    then
+        modify ($patient) {CPIS +=2};
+        System.out.println( "CPIS changed :Localized infiltrates chest X ray, CPI of patient " + $patient.name + " increased by 2, current value = " + $patient.CPIS);
+        
+end
+
+
+// rule to add 0 points if no progression of infiltrate from prior radiographs    
+rule "CPISNoInfiltrateProgression"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 5 column 1)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's chest X rays and if no progression found over prior x-rays adds 0 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (progression == "None")
+    then
+        modify ($patient) {CPIS +=0};
+        System.out.println( "CPIS changed :No infiltrate progression, CPI of patient " + $patient.name + " increased by 0, current value = " + $patient.CPIS);
+        
+end
+
+// rule to add 2 points to CPIS if there is progression in the infiltrate
+rule "CPISPositiveInfiltrateProgression"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 5 column 3)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's chest X rays and if  progression found and ARDS and CHF found unlikely adds 2 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (progression == "Yes" && (ARDS == false || == "NO") && (CHF == false || == "NO"))
+    then
+        modify ($patient) {CPIS +=2};
+        System.out.println( "CPIS changed :Progression of infiltrates and both ARDS and CHF unlikely, CPI of patient " + $patient.name + " increased by 2, current value = " + $patient.CPIS);
+        
+end
+
+// rule to add cero point to CPIS if no/light growth of culture
+rule "CPISNoCultureGrowthOrLightCultureGrowth"
+// ********** AUDIT METADATA INFO ********************************
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 6 column 1)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's culture of ET suction and if no growth or light growth found over prior culture adds 0 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (etCulture == "None" || etCulture == "Light")
+    then
+        modify ($patient) {CPIS +=0};
+        System.out.println( "CPIS changed :None or Light Culture Growth, CPI of patient " + $patient.name + " increased by 0, current value = " + $patient.CPIS);
+        
+end  
+
+rule "CPISCultureHeavyGrowth"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 6 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's culture of ET suction and if heavy growth adds 1 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (etCulture == "Heavy")
+    then
+        modify ($patient) {CPIS +=1};
+        System.out.println( "CPIS changed :Heavy Culture Growth, CPI of patient " + $patient.name + " increased by 1, current value = " + $patient.CPIS);
+        
+end
+
+// add one extra point when same bacteria and heavy culture growth
+rule "CPISCultureHeavyGrowthAndSameBacteria"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 6 column 2)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's culture of ET suction and if heavy growth and same bacteria on gram stain  adds 1 extra points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (etCulture == "Heavy" && sameBacteria == true)
+    then
+        modify ($patient) {CPIS +=1};
+        System.out.println( "CPIS changed :Heavy Culture Growth same bacteria, CPI of patient " + $patient.name + " increased by 1, current value = " + $patient.CPIS);
+        
+end
+
+
+rule "CPISHighOxygenationOrARDS"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 7 column 1)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's oxygenation and if it's > 240 or patient has ARDS adds 0 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (oxygenation > 240 || ARDS == true)
+    then
+        modify ($patient) {CPIS +=0};
+        System.out.println( "CPIS changed :High oxygen. or ARDS, CPI of patient " + $patient.name + " increased by 0, current value = " + $patient.CPIS);
+        
+end
+
+
+
+rule "CPISLowOxygenationAndNotARDS"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(80)
+  @lineRange(CPIS calculation table, row 7 column 3)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Measures patient's oxygenation and if it's <= 240 and patient has no ARDS adds 2 points to the CPI Score")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(CPISAlert)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 100 
+    no-loop
+    agenda-group "cpis"
+    when
+        $patient: Patient (oxygenation <= 240 && ARDS == false)
+    then
+        modify ($patient) {CPIS +=2};
+        System.out.println( "CPIS changed : Low oxygen. and no ARDS, CPI of patient " + $patient.name + " increased by 2, current value = " + $patient.CPIS);
+        
+end
+
+
+// Diagnosis rules
+
+// Temporal Rule to diagnose Unlikely VAP
+rule "IsUnlikelyVAP"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(1-4)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Checks value of CPIS and issues diagnosis vap unlikely")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Diagnosis)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 200 
+    no-loop
+    agenda-group "diagnosis"
+    when
+        $patient: Patient()
+        $initialCPI:CPIScore (patient==$patient , type=="diagnosis", cpiScore <= 6) from entry-point "NursingStream"
+    then
+      insertLogical (new Diagnosis($patient,"VAP unlikely"));
+        System.out.println("Diagnosis for patient " + $patient.name + " is: Unlikely VAP. If VAP strongly suspected anyway consider treatment");
+end
+
+
+// test temporal rule
+rule "test"
+agenda-group "diagnosis"
+  lock-on-active
+    salience 200 
+    no-loop
+    
+    when    
+        // if patient has CPIS>6 within 72 hours after hospitalization and does not come from a long-term-care facility
+        
+        $patient: Patient()
+      $initialCPI : CPIScore (patient==$patient, type=="diagnosis", $patient.hospitalizedSince) 
+                   from entry-point "NursingStream"       
+    then
+      
+      //System.out.println("temporal rule fired");    
+       
+end
+
+
+// Temporal Rule to diagnose Early onset VAP (detected during 72 hours hospitalization)
+rule "IsEarlyOnsetVAP"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(7-10)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Checks value of CPIS and within 72 hours hospitalization and if > 6 and patient does not come from hospital or nursing facility last 3 months, issues diagnosis early onset vap")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Diagnosis)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+  lock-on-active
+    salience 200 
+    no-loop
+    agenda-group "diagnosis"
+    when    
+        // if patient has CPIS>6 within 72 hours after hospitalization and does not come from a long-term-care facility 
+        $patient: Patient(origin=="")
+      $initialCPI : CPIScore (patient==$patient, type=="diagnosis", cpiScore > 6,
+                    $patient.hospitalizedSince) 
+                   from entry-point "NursingStream"       
+    then
+      // diagnosis is Early Onset VAP
+      System.out.println ("Session time at rule trigger: "+ (drools.getWorkingMemory().getSessionClock().getCurrentTime())/60000); 
+      insertLogical (new Diagnosis($patient,"Early-Onset VAP" ) );
+      System.out.println("Diagnosis for patient " + $patient.name + " is Early-Onset VAP");    
+       
+end
+
+
+// First Temporal Rule to diagnose Late onset VAP (comes from nursing) 
+rule "IsLateOnsetVAP1"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(15)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Checks value of CPIS > 6, which indicates VAP, and checks patient's origin to see if he comes from long term care facility, then issues diagnosis late-onset vap")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Diagnosis)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+
+  lock-on-active
+  no-loop
+    salience 200 
+    agenda-group "diagnosis"
+    
+    when
+      // type 1: patient has late onset vap because patient cpi score >6 and has been in long term facility last 3 months
+      $patient: Patient (origin!= "")
+      $initialCPI : CPIScore (patient==$patient, type=="diagnosis", cpiScore > 6) 
+                              from entry-point "NursingStream"      
+        
+    then
+      insertLogical (new Diagnosis($patient,"Late-Onset VAP" ));
+      System.out.println("Diagnosis for patient " + $patient.name + " is: Late-onset VAP1");
+end
+
+// Second Temporal Rule to diagnose Late onset VAP (does not come from long-term and detected AFTER 72 hours hospitalization) 
+rule "IsLateOnsetVAP2"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(15)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("Checks value of CPIS > 6, which indicates VAP, and if patient does not come from long term care(3months) in other facility, but VAP is detected after 72 hours hospitalization, then issues diagnosis late-onset vap")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Diagnosis)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+  lock-on-active
+  no-loop
+    salience 200 
+    agenda-group "diagnosis"
+    
+    when
+      $patient: Patient (origin== "")
+      $initialCPI : CPIScore (patient==$patient, type=="diagnosis", cpiScore > 6, 
+                               $patient.hospitalizedSince) 
+                              from entry-point "NursingStream"      
+        
+    then
+      insertLogical (new Diagnosis($patient,"Late-Onset VAP" ));
+      System.out.println("Diagnosis for patient " + $patient.name + " is: Late-onset VAP2");
+end
+
+
+// ************************************ TREATMENT RULES ********************************
+
+// Rule to determine treatment of Unlikely VAP 
+rule "TREAUnlikelyVAP"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(11-12)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with diagnosis unlikely VAP,no treatment needed")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Treatment)
+  @infectionType(noVAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 200
+    no-loop 
+    agenda-group "treatment"  
+    when
+          $patient:Patient ()
+          $diagnosis:Diagnosis (patient == $patient, diagnosisName == "VAP Unlikely")
+         
+    then
+      
+          insertLogical (new Treatment($patient,$diagnosis,1,"No treatment",0));
+          System.out.println("Treatment of patient " + $patient.name + " is : No treatment required");
+      
+end
+
+// Rule to determine treatment of Early Onset VAP for patients with no peniciline allergy
+// this rule has an insertLogical to make use of Drools Truth Maintenance system automatically
+rule "TREAEarlyOnsetVAPNoSeverePCNAllergy"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(11-12)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with no severe PCN Allergy and  diagnosis Early Onset VAP, and certain agents issues a treatment")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Treatment)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 200
+    no-loop 
+    agenda-group "treatment"  
+    when
+          $patient:Patient (etCultureAgent == "S.Pneumoniae" 
+                                    || =="H.Influenzea" 
+                                    || == "S.Aureus" ,
+                                    PCNAllergy == false)
+          $diagnosis:Diagnosis (patient == $patient, diagnosisName == "Early-Onset VAP")
+         
+    then
+      
+          insertLogical (new Treatment($patient,$diagnosis,2,"Ceftriaxone 1g IV Q24H",7));
+          System.out.println("Treatment of patient " + $patient.name + " is : Ceftriaxone 1g IV Q24H for 7 days");
+      
+end
+
+// Rule to determine treatment of Early Onset VAP for patients with severe peniciline allergy
+// this rule has an insertLogical to make use of Drools Truth Maintenance system automatically
+rule "TREAEarlyOnsetVAPSeverePCNAllergy"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(13)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with severe PCN Allergy and  diagnosis Early Onset VAP and certain agents issues a specific treatment")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Treatment)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 200
+    no-loop 
+    agenda-group "treatment" 
+    when
+          $patient: Patient ((etCultureAgent == "S.Pneumoniae" 
+                                        || == "H.Influenzea" 
+                                        || == "S.Aureus"),
+                                        PCNAllergy == true)
+          $diagnosis:Diagnosis (patient == $patient, diagnosisName == "Early-Onset VAP")
+            
+    then
+          insertLogical (new Treatment($patient,$diagnosis,3,"Moxifloxacin 400mg IV Q24H", 7)); 
+          System.out.println("Treatment of patient " + $patient.name + " is : Moxifloxacin 400mg IV Q24H for 7 days"); 
+end
+
+// Rule to determine treatment of Late onset VAP for patients with no PCN Allergy
+rule "TREALateOnsetVAPNoSeverePCNAllergy"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(14-18)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with no severe PCN Allergy and  diagnosis Late Onset VAP and certain agents issues a specific treatment")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Treatment)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 200
+    no-loop 
+    agenda-group "treatment" 
+    when
+         $patient: Patient ((etCultureAgent == "P.Aeruginosa" 
+                                       || == "Other Gram-negative bacilli" 
+                                       || == "S.Aureus"),
+                                       PCNAllergy == false)
+         $diagnosis:Diagnosis (patient == $patient, diagnosisName == "Late-Onset VAP")
+             
+            
+    then
+         insertLogical (new Treatment($patient,$diagnosis,4,"Vancomycin PLUS Piperacilin/tazobactam 4.5g IV Q6H OR Cefepime 2g IV OR Q8H +- Tobramycin", 7)); 
+         System.out.println("Treatment of patient " + $patient.name + " is : Vancomycin PLUS Piperacilin/tazobactam 4.5g IV Q6H OR Cefepime 2g IV OR Q8H +- Tobramycin for 7 ddays"); 
+end
+    
+// Rule to determine treatment of Late onset VAP for patients with severe PCN Allergy
+rule "TREALateOnsetVAPSeverePCNAllergy"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(19-21)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with severe PCN Allergy and  diagnosis Late Onset VAP and certain agents issues a specific treatment")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Treatment)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    lock-on-active
+    salience 200
+    no-loop 
+    agenda-group "treatment" 
+    when
+          $patient: Patient ((etCultureAgent == "P.Aeruginosa" 
+                                          || == "Other Gram-negative bacilli" 
+                                          || == "S.Aureus" ),
+                                          PCNAllergy == true)
+          $diagnosis:Diagnosis (patient == $patient, diagnosisName == "Late-Onset VAP")
+       
+    then
+           insertLogical (new Treatment($patient,$diagnosis, 5,"Vancomycin PLUS Ciprofloxacin 400mg IV Q8H OR Aztreonam 2g IV Q8H PLUS Tobramycin", 7)) 
+           System.out.println("Treatment of patient " + $patient.name + " is : Vancomycin PLUS Ciprofloxacin 400mg IV Q8H OR Aztreonam 2g IV Q8H PLUS Tobramycin for 7 days"); 
+end
+
+
+ // Rule to add 7 days at least to treatment duration when S.Aureus bacteremia
+ rule "TREAVAPwithSAureus"
+ // rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(36-37)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with early or late onset VAP if agent is S. auereus, add 7 days to previous defined treatment")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(Treatment)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    
+    salience 200
+    no-loop 
+    agenda-group "treatment"
+    when
+         $patient: Patient (etCultureAgent == "S.Aureus")
+         $diagnosis:Diagnosis (patient == $patient, diagnosisName == "Late-Onset VAP" || == "Early-Onset VAP")
+         $treatment : Treatment (patient == $patient, diagnosis== $diagnosis)
+       
+    then
+         modify ($treatment) { treatmentDuration += 7 };
+         System.out.println("Duration: Treatment of patient " + $patient.name + " diagnosed with " + $diagnosis.diagnosisName + " increased in 7 days");  
+end
+
+// ******************** FOLLOW-UP rules ********************************************
+
+// Temporal rule to stop treatment when unlikely VAP has been diagnosed but it's strongly suspected and therefore treatment started
+rule "UnlikelyVAPFollowUp"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(31-32)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with unlikely VAP if CPIS remains <= 6 stop treatment after 3 days")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(FollowUp)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    
+    salience -50
+    
+    agenda-group "follow-up"
+    when
+      // for a given patient diagnosed with vap unlikely a treatment exists anyway, check cpis after
+      // 3 days of treatment date to check progress: if cpis<=6 stop treatment
+        $patient: Patient()
+        $diagnosis:Diagnosis (patient==$patient,diagnosisName=="VAP unlikely")
+        $treatment:Treatment (patient==$patient, diagnosis==$diagnosis)
+        $followUpCPI: CPIScore (patient==$patient, type == "follow-up", cpiScore <= 6, 
+                           $treatment.treatmentBeginDate) from entry-point "NursingStream"
+    then
+      // antibiotics can be stopped, so decrease treatment duration
+      //modify ($treatment) { treatmentDuration -= 4 };
+      System.out.println("Follow-up of patient " + $patient.name + " CPI Score stable and lower than 6 after 3 days, antibiotics can be stopped");
+      System.out.println ("Session time at rule trigger: "+ (drools.getWorkingMemory().getSessionClock().getCurrentTime())/60000);
+end
+
+
+
+// Temporal rule, if patient still shows symptoms after 7 days of beginning of treatment issue warning
+rule "NegativeProgressFollowUp" 
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(34-35)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient on treatment for VAP if symptoms persist after 7 days consider alterntive source or bronchoscopy")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(FollowUp)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    salience -50
+    agenda-group "follow-up"
+    when
+      // REVIEW if condition early onset or late onset vap should be added to exclude non.vap patients
+        $patient : Patient ( symptomsAfter7days == true)
+        $treatment : Treatment (patient==$patient)
+        $followUpCPI : CPIScore (patient==$patient, type=="follow-up", cpiScore > 6, 
+                        $treatment.treatmentBeginDate) 
+                       from entry-point "NursingStream"   
+        
+    then
+        System.out.println( "Follow-up: Patient does not improve after 7 days of treatment, consider alternative source and/or bronchoscopy with quantitative cultures for VAP patient " + $patient.name );
+end
+
+// ******************* Treatment notes rules ****************************
+  
+// Rule for enterococci and candida species
+rule "GenEnterococciORCandidaSpecies"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(24-26)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient with enterocci and candida species in sputum issue warning")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(TreatmentNotes)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************ 
+    salience -100 
+    agenda-group "treatmentnotes"
+    when
+        $patient : Patient (etCultureAgent == "Enterococci or candida species")
+    then
+        System.out.println( "Treatment Note: Enterococci or candida species found in patient " + $patient.name +
+        " Finding enterococci or candida species in sputum culture is normal in hospitalized patients, they are colonizing organisms and should not be treated with antimicrobials" );
+end
+    
+// Rule for immunocompromised patients, when there is an immunocompromised patient being treated consider adding antibiotic
+rule "GenImmunocompromisedPatients"
+// rule source information: sourceDocument, pageNumber, lineRange
+  @sourceDocument(John Hopkins Clinical Guidelines Infections)
+  @pageNumber(81)
+  @lineRange(27-29)
+// generic information about the rule: date, ruleDescription, ruleAuthor, ruleVersion
+  @ruleDate(2014-06-11)
+  @ruleDescription("For a patient who is immunocompromised and treatment is started for vap, add another antibiotic for preventing legionella")
+  @ruleAuthor(Natalia Iglesias)
+  @ruleVersion(1.0.0)
+// clinicalAction (diagnosis, treatment, score,...), infectionType (VAP...), agent, antibiotic)
+  @clinicalAction(TreatmentNotes)
+  @infectionType(VAP)
+  @infectionAgent()
+  @infectionAntibiotic()
+// *********** END OF AUDIT METADATA INFO ************************
+    salience -100 
+    agenda-group "treatmentnotes"
+    when
+      // patient is immunocompromised and there is a treatment in place, add azithromycin to prevent legionella. this rule could be more granular
+        $patient : Patient (immunocompromised == true)
+        $treatment: Treatment (patient == $patient)
+    then
+        System.out.println( "Treatment Note: Patient immunocompromised, consider adding Azithromycin 500 mg Q24H to Piperacilin/tazobactam, Cefepime or Aztreonam to cover Legionella" );
+end
+
+    

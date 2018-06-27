@@ -39,6 +39,7 @@ public class DroolsDescription {
 
         List<DroolsRule>  droolsRulesList = new ArrayList<>();
 
+
         List<RuleDescr> ruleDescrList = this.packageDescr.getRules();
 
         for (RuleDescr ruleDescr : ruleDescrList){
