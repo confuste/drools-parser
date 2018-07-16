@@ -8,6 +8,7 @@ import java.util.List;
  */
 public class LhsCondition {
 
+
     private String id;
     private String objectType;
     private List<String> constraintList;

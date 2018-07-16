@@ -19,6 +19,9 @@ public class LeftHandSide {
         this.lhsConditionList.add(lhsCondition);
     }
 
+    public List<LhsCondition> getLhsConditionList() {
+        return lhsConditionList;
+    }
 }
 
 

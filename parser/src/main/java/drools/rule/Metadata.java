@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class Metadata {
 
-    Map<String, String> metadataMap;
+    private Map<String, String> metadataMap;
 
     public Metadata(){
         this.metadataMap = new HashMap<>();

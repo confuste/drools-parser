@@ -10,7 +10,7 @@ import java.util.Map;
  */
 public class Attribute {
 
-    Map<String, String> attributeMap;
+    private Map<String, String> attributeMap;
 
     public Attribute(){
         this.attributeMap = new HashMap<>();

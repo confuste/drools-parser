@@ -1,7 +1,7 @@
 import drools.DroolsDescription;
 import drools.DroolsParser;
 import drools.LanguageLevel;
-import drools.rule.DroolsRule;
+import drools.rule.*;
 import org.drools.compiler.compiler.DroolsParserException;
 import utils.FileUtils;
 
@@ -81,10 +81,33 @@ public class Main {
             for(DroolsRule rule : ruleList){
 
                 System.out.println("Rule name: " + rule.getName());
+                System.out.println(rule.getNamespace());
+                printAttributes(rule.getAttribute());
+                printMetadata(rule.getMetadata());
+                printLeftHandSide(rule.getLeftHandSide());
+                System.out.println();
+
+
             }
 
         } catch (DroolsParserException e) {
             e.printStackTrace();
         }
     }
+
+    private static void printAttributes(Attribute attribute){
+        System.out.println("- Atributos: " + attribute.getKeyValueList());
+    }
+
+    private static void printMetadata(Metadata metadata){
+        System.out.println("- Metadatos: " + metadata.getKeyValueList());
+    }
+
+    private static void printLeftHandSide(LeftHandSide leftHandSide){
+        List<LhsCondition> lhsConditionList = leftHandSide.getLhsConditionList();
+        for(LhsCondition lhscond : lhsConditionList){
+            System.out.println("-- LHS id: " + lhscond.getId() + ", ojbectType: " + lhscond.getObjectType() + ", Constraints:" + lhscond.getConstraintList());
+        }
+    }
+
 }
