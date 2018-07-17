@@ -18,6 +18,8 @@ public class Neo4jAttribute {
 
     }
 
+
+
     public Neo4jAttribute(String attribute) {
         this.attribute = attribute;
     }
@@ -25,5 +27,14 @@ public class Neo4jAttribute {
 
     public String[] getKeyValue(){
         return this.attribute.split("=");
+    }
+
+
+    public String getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
     }
 }

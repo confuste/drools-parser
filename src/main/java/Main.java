@@ -3,9 +3,14 @@ import drools.DroolsParser;
 import drools.LanguageLevel;
 import drools.rule.*;
 import org.drools.compiler.compiler.DroolsParserException;
+import org.neo4j.ogm.config.Configuration;
+import org.neo4j.ogm.session.SessionFactory;
+import repository.mapper.tonode4j.MapperToNeo4JImp;
+import repository.neo4j.Neo4jRule;
 import utils.FileUtils;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -76,6 +81,22 @@ public class Main {
 
             List<DroolsRule> ruleList = droolsDescription.getRules();
 
+            /*
+            System.out.println("JSON serialized and deserialized test");
+            String json = new Gson().toJson(ruleList.get(0).getLeftHandSide());
+            System.out.println(json);
+            LeftHandSide lhs = new Gson().fromJson(json, LeftHandSide.class);
+            LhsCondition lhsCondition = lhs.getLhsConditionList().get(0);
+            System.out.println("id: " + lhsCondition.getId() + ", objectType: " + lhsCondition.getObjectType()  + ", ConstraintList:" + lhsCondition.getConstraintList());
+            */
+
+            List<Neo4jRule> neo4jRuleList = convertModelToNeo4jModel(ruleList);
+            initOGMneo4j(neo4jRuleList);
+
+            System.out.println("----------------");
+
+            /*
+
             System.out.println("ruleList size: " + ruleList.size());
 
             for(DroolsRule rule : ruleList){
@@ -86,13 +107,15 @@ public class Main {
                 printMetadata(rule.getMetadata());
                 printLeftHandSide(rule.getLeftHandSide());
                 System.out.println();
-
-
             }
+            */
 
         } catch (DroolsParserException e) {
             e.printStackTrace();
         }
+
+
+
     }
 
     private static void printAttributes(Attribute attribute){
@@ -109,5 +132,59 @@ public class Main {
             System.out.println("-- LHS id: " + lhscond.getId() + ", ojbectType: " + lhscond.getObjectType() + ", Constraints:" + lhscond.getConstraintList());
         }
     }
+
+
+
+    private static List<Neo4jRule> convertModelToNeo4jModel(List<DroolsRule> droolsRuleList){
+        MapperToNeo4JImp modelToNeo4JImp = new MapperToNeo4JImp();
+        return modelToNeo4JImp.droolsRuleListToNeo4jRuleList(droolsRuleList);
+    }
+
+    private static void initOGMneo4j(List<Neo4jRule> neo4jRuleList){
+
+        final String NEO4J_URI = "bolt://neo4j:neo4jpass@localhost";
+        final String PACKAGE = "repository.neo4j";
+
+        Configuration configuration = new Configuration.Builder()
+                .uri(NEO4J_URI)
+                .build();
+
+        SessionFactory sessionFactory = new SessionFactory(configuration, PACKAGE);
+        org.neo4j.ogm.session.Session session = sessionFactory.openSession();
+
+        /*
+        for(Neo4jRule neo4jRule : neo4jRuleList){
+            session.save(neo4jRule);
+        }
+        */
+
+
+        /*
+        for (int i = 0; i < 3; i++) {
+            session.beginTransaction();
+            session.save(neo4jRuleList.get(i));
+            session.getTransaction().commit();
+        }
+        */
+
+
+
+
+        session.beginTransaction();
+
+        Collection<Neo4jRule> neo4jRuleRetrieveList = session.loadAll(Neo4jRule.class, 100); /* Note -1 for deeply search*/
+
+        for (Neo4jRule neo4jRule : neo4jRuleRetrieveList) {
+            System.out.println(neo4jRule.getName());/* actor.getPlayedIn() return null */
+        }
+
+        session.getTransaction().commit();
+
+
+
+        sessionFactory.close();
+    }
+
+
 
 }

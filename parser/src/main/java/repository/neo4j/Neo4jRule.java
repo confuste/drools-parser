@@ -19,7 +19,8 @@ public class Neo4jRule {
     private String name;
     private String salience;
     private String namespace;
-
+    private String consequence;
+    private String leftHandSide;
 
     @Relationship(type = "HAS_ATTRIBUTE", direction =  Relationship.INCOMING)
     private Set<Neo4jAttribute> attributeSet = new HashSet<>();
@@ -29,9 +30,9 @@ public class Neo4jRule {
     private Set<Neo4jMetadata> metadata = new HashSet<>();
 
 
-    private Set<Neo4jLeftHandSide> leftHandSide = new HashSet<>();
 
-    private Neo4jConsequence consequence;
+    //private Set<Neo4jLeftHandSide> leftHandSide = new HashSet<>();
+
 
     public Neo4jRule() {
 
@@ -77,19 +78,19 @@ public class Neo4jRule {
         this.metadata = metadata;
     }
 
-    public Set<Neo4jLeftHandSide> getLeftHandSide() {
+    public String getLeftHandSide() {
         return leftHandSide;
     }
 
-    public void setLeftHandSide(Set<Neo4jLeftHandSide> leftHandSide) {
+    public void setLeftHandSide(String leftHandSide) {
         this.leftHandSide = leftHandSide;
     }
 
-    public Neo4jConsequence getConsequence() {
+    public String getConsequence() {
         return consequence;
     }
 
-    public void setConsequence(Neo4jConsequence consequence) {
+    public void setConsequence(String consequence) {
         this.consequence = consequence;
     }
 

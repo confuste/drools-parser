@@ -34,4 +34,12 @@ public class Metadata {
 
         return metadataArray;
     }
+
+    public Map<String, String> getMetadataMap() {
+        return metadataMap;
+    }
+
+    public void setMetadataMap(Map<String, String> metadataMap) {
+        this.metadataMap = metadataMap;
+    }
 }

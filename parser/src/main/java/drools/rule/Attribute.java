@@ -24,6 +24,14 @@ public class Attribute {
         return this.attributeMap.get(key);
     }
 
+    public Map<String, String> getAttributeMap() {
+        return attributeMap;
+    }
+
+    public void setAttributeMap(Map<String, String> attributeMap) {
+        this.attributeMap = attributeMap;
+    }
+
     public List<String> getKeyValueList(){
 
         List<String> attributeArray = new ArrayList<>();

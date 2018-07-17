@@ -1,7 +1,6 @@
 package repository.neo4j;
 
-import org.neo4j.ogm.annotation.GeneratedValue;
-import org.neo4j.ogm.annotation.Id;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,8 +15,6 @@ public class Neo4jLeftHandSide {
     https://stackoverflow.com/questions/10930624/creating-json-objects-directly-from-model-classes-in-java
     */
 
-    @Id
-    @GeneratedValue
     private String idGenerated;
 
 
