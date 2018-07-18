@@ -1,4 +1,4 @@
-package repository.neo4j;
+package neo4jrepository.neo4jmodel;
 
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by alex on 16/7/18.
+ * Node Enttity of a Rule
  */
 @NodeEntity(label="Rule")
 public class Neo4jRule {
@@ -22,11 +22,11 @@ public class Neo4jRule {
     private String consequence;
     private String leftHandSide;
 
-    @Relationship(type = "HAS_ATTRIBUTE", direction =  Relationship.INCOMING)
+    @Relationship(type = "HAS_ATTRIBUTE", direction =  Relationship.OUTGOING)
     private Set<Neo4jAttribute> attributeSet = new HashSet<>();
 
 
-    @Relationship(type = "HAS_METADATA", direction =  Relationship.INCOMING)
+    @Relationship(type = "HAS_METADATA", direction =  Relationship.OUTGOING)
     private Set<Neo4jMetadata> metadata = new HashSet<>();
 
 
@@ -98,6 +98,10 @@ public class Neo4jRule {
         this.attributeSet.add(neo4jAttribute);
     }
 
+    /**
+     * Get an Attribute HashMap with keys and values through a HashSet
+     * @return Map of String and String
+     */
     public Map<String, String> getKeyValueAttributeHashMap(){
 
         Map<String, String> attributeHashMap = new HashMap<>();
@@ -110,6 +114,10 @@ public class Neo4jRule {
         return attributeHashMap;
     }
 
+    /**
+     * Get a Metadata HashMap with keys and values through an HashSet
+     * @return Map of String and String
+     */
     public Map<String, String> getKeyValueMetadataHashMap() {
 
         Map<String, String> metadataHashMap = new HashMap<>();

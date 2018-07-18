@@ -1,12 +1,13 @@
-package repository.mapper.tonode4j;
+package neo4jrepository.mapper.tonode4j;
 
 import com.google.gson.Gson;
 import drools.rule.Attribute;
 import drools.rule.DroolsRule;
 import drools.rule.Metadata;
-import repository.neo4j.Neo4jAttribute;
-import repository.neo4j.Neo4jMetadata;
-import repository.neo4j.Neo4jRule;
+import neo4jrepository.neo4jmodel.Neo4jAttribute;
+import neo4jrepository.neo4jmodel.Neo4jMetadata;
+import neo4jrepository.neo4jmodel.Neo4jRule;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;

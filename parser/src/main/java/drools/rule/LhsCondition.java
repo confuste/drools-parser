@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by alex on 25/6/18.
+ * Represents a condition of a Rule Left Hand Side.
+ * It has the id, the object type and the constraint list.
  */
 public class LhsCondition {
 

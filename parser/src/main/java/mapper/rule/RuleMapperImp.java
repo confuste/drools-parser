@@ -26,6 +26,16 @@ public class RuleMapperImp implements RuleMapper {
         return droolsRule;
     }
 
+    @Override
+    public List<DroolsRule> ruleDescrListToRuleDroolsList(List<RuleDescr> ruleDescrList) {
+
+        List<DroolsRule> droolsRuleList = new ArrayList<>();
+        for(RuleDescr ruleDescr : ruleDescrList){
+            droolsRuleList.add(this.ruleDescrToRuleDrools(ruleDescr));
+        }
+        return droolsRuleList;
+    }
+
     private Attribute mapAttribute(RuleDescr ruleDescr){
         Attribute attribute = new Attribute();
 

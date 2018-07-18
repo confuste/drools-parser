@@ -3,13 +3,16 @@ package drools;
 import org.kie.internal.builder.conf.LanguageLevelOption;
 
 /**
- * Created by alex on 21/6/18.
+ * Enum class to specify every language level that Drools can allow.
  */
 public enum LanguageLevel {
 
     DRL5,
     DRL6;
 
+    /**
+     * Get the correct Language Level through our enum type
+     */
     public LanguageLevelOption getLanguageLevel(LanguageLevel languageLevel){
 
         LanguageLevelOption languageLevelOption;

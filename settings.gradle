@@ -1,3 +1,9 @@
 rootProject.name = 'com.alejandrofuster.droolsparser'
 include 'parser'
+include 'neo4j'
+findProject(':neo4j')?.name = 'com.alejandrofuster.neo4j'
+include 'neo4j'
+include 'repository'
+include 'neo4jrepository'
+include 'repository'
 

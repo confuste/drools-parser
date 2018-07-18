@@ -1,4 +1,4 @@
-package repository.neo4j;
+package neo4jrepository.neo4jmodel;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;

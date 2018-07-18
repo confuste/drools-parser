@@ -1,7 +1,7 @@
-package repository.mapper.fromnode4j;
+package neo4jrepository.mapper.fromnode4j;
 
 import drools.rule.DroolsRule;
-import repository.neo4j.Neo4jRule;
+import neo4jrepository.neo4jmodel.Neo4jRule;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package repository.neo4j;
+package neo4jrepository.neo4jmodel;
 
 
 

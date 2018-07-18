@@ -2,9 +2,8 @@ package drools.rule;
 
 
 /**
- * Created by alex on 25/6/18.
+ * Represents the consequence of a rule
  */
-
 public class Consequence {
 
     private String consequence;

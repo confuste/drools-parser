@@ -1,8 +1,9 @@
-package repository.mapper.fromnode4j;
+package neo4jrepository.mapper.fromnode4j;
 
 import com.google.gson.Gson;
 import drools.rule.*;
-import repository.neo4j.Neo4jRule;
+import neo4jrepository.neo4jmodel.Neo4jRule;
+
 
 import java.util.ArrayList;
 import java.util.List;

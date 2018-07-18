@@ -2,15 +2,15 @@ import drools.DroolsDescription;
 import drools.DroolsParser;
 import drools.LanguageLevel;
 import drools.rule.*;
+import neo4jrepository.mapper.tonode4j.MapperToNeo4JImp;
+import neo4jrepository.neo4jmodel.Neo4jRule;
 import org.drools.compiler.compiler.DroolsParserException;
 import org.neo4j.ogm.config.Configuration;
+import org.neo4j.ogm.session.Session;
 import org.neo4j.ogm.session.SessionFactory;
-import repository.mapper.tonode4j.MapperToNeo4JImp;
-import repository.neo4j.Neo4jRule;
 import utils.FileUtils;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -95,6 +95,7 @@ public class Main {
 
             System.out.println("----------------");
 
+
             /*
 
             System.out.println("ruleList size: " + ruleList.size());
@@ -106,9 +107,10 @@ public class Main {
                 printAttributes(rule.getAttribute());
                 printMetadata(rule.getMetadata());
                 printLeftHandSide(rule.getLeftHandSide());
+                printConsequence(rule.getConsequence());
                 System.out.println();
-            }
-            */
+            }*/
+
 
         } catch (DroolsParserException e) {
             e.printStackTrace();
@@ -133,6 +135,11 @@ public class Main {
         }
     }
 
+    private static void printConsequence(Consequence consequence){
+        System.out.println("- Consequence: " + consequence.getConsequence());
+    }
+
+
 
 
     private static List<Neo4jRule> convertModelToNeo4jModel(List<DroolsRule> droolsRuleList){
@@ -142,15 +149,13 @@ public class Main {
 
     private static void initOGMneo4j(List<Neo4jRule> neo4jRuleList){
 
-        final String NEO4J_URI = "bolt://neo4j:neo4jpass@localhost";
-        final String PACKAGE = "repository.neo4j";
 
         Configuration configuration = new Configuration.Builder()
-                .uri(NEO4J_URI)
+                .uri(neo4jrepository.Configuration.NEO4J_URI)
                 .build();
 
-        SessionFactory sessionFactory = new SessionFactory(configuration, PACKAGE);
-        org.neo4j.ogm.session.Session session = sessionFactory.openSession();
+        SessionFactory sessionFactory = new SessionFactory(configuration, neo4jrepository.Configuration.NEO4J_MODEL_PACKAGE);
+        Session session = sessionFactory.openSession();
 
         /*
         for(Neo4jRule neo4jRule : neo4jRuleList){
@@ -159,27 +164,27 @@ public class Main {
         */
 
 
-        /*
+
         for (int i = 0; i < 3; i++) {
             session.beginTransaction();
             session.save(neo4jRuleList.get(i));
             session.getTransaction().commit();
         }
-        */
 
 
 
 
+        /*
         session.beginTransaction();
 
-        Collection<Neo4jRule> neo4jRuleRetrieveList = session.loadAll(Neo4jRule.class, 100); /* Note -1 for deeply search*/
+        Collection<Neo4jRule> neo4jRuleRetrieveList = session.loadAll(Neo4jRule.class, 100); //Note -1 for deeply search
 
         for (Neo4jRule neo4jRule : neo4jRuleRetrieveList) {
-            System.out.println(neo4jRule.getName());/* actor.getPlayedIn() return null */
+            System.out.println(neo4jRule.getName());
         }
 
         session.getTransaction().commit();
-
+*/
 
 
         sessionFactory.close();

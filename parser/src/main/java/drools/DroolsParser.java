@@ -4,10 +4,10 @@ import org.drools.compiler.compiler.DrlParser;
 import org.drools.compiler.compiler.DroolsParserException;
 import org.drools.compiler.lang.descr.PackageDescr;
 
-/**
- * Created by alex on 21/6/18.
- */
 
+/**
+ * Class to configure the Drools Parser.
+ */
 public class DroolsParser {
 
     private LanguageLevel languageLevel;
@@ -15,6 +15,14 @@ public class DroolsParser {
     private DrlParser parser;
     private PackageDescr pkgDescr;
 
+    /**
+     * Builder constructor to be abe to add new configurations in the future.
+     */
+    /* How to construct a new DroolsParser? Something like that:
+     DroolsParser = new DroolsParser.Builder(rulesTxt)
+                                    .languageLevel(LanguageLevel.DRL6)
+                                    .build();
+     */
     public static class Builder {
 
         private final String text;

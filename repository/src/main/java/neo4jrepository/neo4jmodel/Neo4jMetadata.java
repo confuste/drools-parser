@@ -1,4 +1,4 @@
-package repository.neo4j;
+package neo4jrepository.neo4jmodel;
 
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
@@ -23,7 +23,12 @@ public class Neo4jMetadata {
     }
 
 
-    public String[] getKeyValue(){
+    /**
+     * Split the String key=value in a Array with both Strings
+     * @return String array
+     */
+
+    protected String[] getKeyValue(){
         return this.metadata.split("=");
     }
 }

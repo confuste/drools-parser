@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by alex on 25/6/18.
+ * Represents the Left hand side (LHS) of a rule
+ * It have a list of conditions
  */
 public class LeftHandSide {
 

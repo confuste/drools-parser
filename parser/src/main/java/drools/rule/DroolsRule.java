@@ -1,7 +1,7 @@
 package drools.rule;
 
 /**
- * Created by alex on 21/6/18.
+ * Represents a rule and its properties
  */
 public class DroolsRule {
 

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by alex on 25/6/18.
+ * Represents the rule Metadata.
  */
 public class Metadata {
 
@@ -20,10 +20,29 @@ public class Metadata {
         this.metadataMap.put(key, value);
     }
 
+    public Map<String, String> getMetadataMap() {
+        return metadataMap;
+    }
+
+    public void setMetadataMap(Map<String, String> metadataMap) {
+        this.metadataMap = metadataMap;
+    }
+
+
+    /**
+     * Get a value through a key
+     * @param key String with the key
+     * @return String with the value
+     */
     public String getValue(String key){
         return this.metadataMap.get(key);
     }
 
+
+    /**
+     * Convert the Map with the key and value to an List where key and value are joined with an "=" symbol.
+     * @return The List of String
+     */
     public List<String> getKeyValueList(){
 
         List<String> metadataArray = new ArrayList<>();
@@ -35,11 +54,5 @@ public class Metadata {
         return metadataArray;
     }
 
-    public Map<String, String> getMetadataMap() {
-        return metadataMap;
-    }
 
-    public void setMetadataMap(Map<String, String> metadataMap) {
-        this.metadataMap = metadataMap;
-    }
 }

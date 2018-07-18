@@ -11,6 +11,10 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
+    compile 'org.neo4j:neo4j-ogm-bolt-driver:3.1.0'
+    compile 'org.neo4j:neo4j-ogm-core:3.1.0'
+
+    compile 'com.google.code.gson:gson:2.8.5'
+
     compile project(':parser')
-    compile project(':repository')
 }

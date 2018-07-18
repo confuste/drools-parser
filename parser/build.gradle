@@ -14,8 +14,5 @@ dependencies {
     // https://mvnrepository.com/artifact/org.drools/drools-compiler
     compile group: 'org.drools', name: 'drools-compiler', version: '7.7.0.Final'
 
-    compile 'org.neo4j:neo4j-ogm-bolt-driver:3.1.0'
-    compile 'org.neo4j:neo4j-ogm-core:3.1.0'
 
-    compile 'com.google.code.gson:gson:2.8.5'
 }

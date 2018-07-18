@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by alex on 21/6/18.
+ * Class that receive a DroolsParser and
+ * get the rules through PackageDescr Drools class
  */
+
 public class DroolsDescription {
 
     private PackageDescr packageDescr;
@@ -24,6 +26,10 @@ public class DroolsDescription {
     }
 
 
+    /**
+     * Get a String List of the imports
+     * @return List of  String with the imports
+     */
     public List<String> getImports(){
         List<ImportDescr> importDescrsList = packageDescr.getImports();
         List<String> importList = new ArrayList<>();
@@ -35,18 +41,14 @@ public class DroolsDescription {
         return importList;
     }
 
+    /**
+     * Get a List of DroolsRule.
+     * The rules from the parser are converted to the specific DroolsRule model.
+     * @return List of DroolsRule
+     */
     public List<DroolsRule> getRules(){
-
-        List<DroolsRule>  droolsRulesList = new ArrayList<>();
-
-
         List<RuleDescr> ruleDescrList = this.packageDescr.getRules();
-
-        for (RuleDescr ruleDescr : ruleDescrList){
-            droolsRulesList.add(this.ruleMapper.ruleDescrToRuleDrools(ruleDescr));
-        }
-
-        return droolsRulesList;
+        return this.ruleMapper.ruleDescrListToRuleDroolsList(ruleDescrList);
     }
 
 }
