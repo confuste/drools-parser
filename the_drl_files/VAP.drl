@@ -981,7 +981,7 @@ rule "TREALateOnsetVAPSeverePCNAllergy"
           $diagnosis:Diagnosis (patient == $patient, diagnosisName == "Late-Onset VAP")
        
     then
-           insertLogical (new Treatment($patient,$diagnosis, 5,"Vancomycin PLUS Ciprofloxacin 400mg IV Q8H OR Aztreonam 2g IV Q8H PLUS Tobramycin", 7)) 
+           insertLogical (new Treatment($patient,$diagnosis, 5,"Vancomycin PLUS Ciprofloxacin 400mg IV Q8H OR Aztreonam 2g IV Q8H PLUS Tobramycin", 7)) ;
            System.out.println("Treatment of patient " + $patient.name + " is : Vancomycin PLUS Ciprofloxacin 400mg IV Q8H OR Aztreonam 2g IV Q8H PLUS Tobramycin for 7 days"); 
 end
 

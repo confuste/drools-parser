@@ -19,19 +19,20 @@ public class Neo4jRule {
     private String name;
     private String salience;
     private String namespace;
-    private String consequence;
-    private String leftHandSide;
-
-    @Relationship(type = "HAS_ATTRIBUTE", direction =  Relationship.OUTGOING)
-    private Set<Neo4jAttribute> attributeSet = new HashSet<>();
+    private String metadata;
+    private String attribute;
 
 
-    @Relationship(type = "HAS_METADATA", direction =  Relationship.OUTGOING)
-    private Set<Neo4jMetadata> metadata = new HashSet<>();
+    @Relationship(type = "HAS_LHS", direction = Relationship.OUTGOING)
+    private Neo4jLeftHandSide leftHandSide;
+    //private Set<Neo4jLeftHandSide> leftHandSideHashSet = new HashSet<>();
 
 
+    @Relationship(type = "HAS_RHS", direction = Relationship.OUTGOING)
+    private Neo4jConsequence consequence;
+    //private Set<Neo4jConsequence> consequenceSet = new HashSet<>();
 
-    //private Set<Neo4jLeftHandSide> leftHandSide = new HashSet<>();
+
 
 
     public Neo4jRule() {
@@ -62,72 +63,68 @@ public class Neo4jRule {
         this.namespace = namespace;
     }
 
-    public Set<Neo4jAttribute> getAttributeSet() {
-        return attributeSet;
-    }
-
-    public void setAttributeSet(Set<Neo4jAttribute> attributeSet) {
-        this.attributeSet = attributeSet;
-    }
-
-    public Set<Neo4jMetadata> getMetadata() {
+    public String getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Set<Neo4jMetadata> metadata) {
+    public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
 
-    public String getLeftHandSide() {
-        return leftHandSide;
+    public String getAttribute() {
+        return attribute;
     }
 
-    public void setLeftHandSide(String leftHandSide) {
-        this.leftHandSide = leftHandSide;
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
     }
 
-    public String getConsequence() {
+    public Neo4jConsequence getConsequence() {
         return consequence;
     }
 
-    public void setConsequence(String consequence) {
+    public void setConsequence(Neo4jConsequence consequence) {
         this.consequence = consequence;
     }
 
-    public void addNeo4jAttribute(Neo4jAttribute neo4jAttribute){
-        this.attributeSet.add(neo4jAttribute);
+    public Neo4jLeftHandSide getLeftHandSide() {
+        return leftHandSide;
     }
 
-    /**
-     * Get an Attribute HashMap with keys and values through a HashSet
-     * @return Map of String and String
-     */
-    public Map<String, String> getKeyValueAttributeHashMap(){
-
-        Map<String, String> attributeHashMap = new HashMap<>();
-        String [] keyValue;
-        for (Neo4jAttribute neo4jAttribute : this.attributeSet){
-            keyValue = neo4jAttribute.getKeyValue();
-            attributeHashMap.put(keyValue[0], keyValue[1]);
-        }
-
-        return attributeHashMap;
+    public void setLeftHandSide(Neo4jLeftHandSide leftHandSide) {
+        this.leftHandSide = leftHandSide;
     }
 
-    /**
-     * Get a Metadata HashMap with keys and values through an HashSet
-     * @return Map of String and String
-     */
-    public Map<String, String> getKeyValueMetadataHashMap() {
-
-        Map<String, String> metadataHashMap = new HashMap<>();
-        String[] keyValue;
-        for (Neo4jMetadata neo4jMetadata : this.metadata) {
-            keyValue = neo4jMetadata.getKeyValue();
-            metadataHashMap.put(keyValue[0], keyValue[1]);
-        }
-
-        return metadataHashMap;
-    }
+    //    /**
+//     * Get an Attribute HashMap with keys and values through a HashSet
+//     * @return Map of String and String
+//     */
+//    public Map<String, String> getKeyValueAttributeHashMap(){
+//
+//        Map<String, String> attributeHashMap = new HashMap<>();
+//        String [] keyValue;
+//        for (Neo4jConsequence neo4jAttribute : this.consequenceSet){
+//            keyValue = neo4jAttribute.getKeyValue();
+//            attributeHashMap.put(keyValue[0], keyValue[1]);
+//        }
+//
+//        return attributeHashMap;
+//    }
+//
+//    /**
+//     * Get a Metadata HashMap with keys and values through an HashSet
+//     * @return Map of String and String
+//     */
+//    public Map<String, String> getKeyValueMetadataHashMap() {
+//
+//        Map<String, String> metadataHashMap = new HashMap<>();
+//        String[] keyValue;
+//        for (Neo4jMetadata neo4jMetadata : this.metadata) {
+//            keyValue = neo4jMetadata.getKeyValue();
+//            metadataHashMap.put(keyValue[0], keyValue[1]);
+//        }
+//
+//        return metadataHashMap;
+//    }
 
 }

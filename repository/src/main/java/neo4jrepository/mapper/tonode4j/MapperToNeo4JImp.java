@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import drools.rule.Attribute;
 import drools.rule.DroolsRule;
 import drools.rule.Metadata;
-import neo4jrepository.neo4jmodel.Neo4jAttribute;
-import neo4jrepository.neo4jmodel.Neo4jMetadata;
-import neo4jrepository.neo4jmodel.Neo4jRule;
+import drools.rule.lhs.LeftHandSide;
+import drools.rule.rhs.Consequence;
+import neo4jrepository.neo4jmodel.*;
 
 
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import java.util.Set;
 public class MapperToNeo4JImp implements MapperToNeo4j {
 
     private Gson gson;
+
 
     public MapperToNeo4JImp(){
         this.gson = new Gson();
@@ -35,10 +36,11 @@ public class MapperToNeo4JImp implements MapperToNeo4j {
         neo4jRule.setName(rule.getName());
         neo4jRule.setSalience(rule.getSalience());
         neo4jRule.setNamespace(rule.getNamespace());
-        neo4jRule.setAttributeSet(attributeDroolsToAttributeNeo4j(rule.getAttribute()));
-        neo4jRule.setMetadata(metadataDroolsToMetadataNeo4j(rule.getMetadata()));
-        neo4jRule.setConsequence(rule.getConsequence().getConsequence());
-        neo4jRule.setLeftHandSide(gson.toJson(rule.getLeftHandSide()));
+        neo4jRule.setAttribute(gson.toJson(rule.getAttribute()));
+        neo4jRule.setMetadata(gson.toJson(rule.getMetadata()));
+
+        neo4jRule.setLeftHandSide(this.lhsDroolsToLhsNeo4j(rule.getLeftHandSide()));
+        neo4jRule.setConsequence(this.consequenceDroolsToConsequenceNeo4j(rule.getConsequence()));
 
 
         return neo4jRule;
@@ -52,35 +54,49 @@ public class MapperToNeo4JImp implements MapperToNeo4j {
         List<Neo4jRule> neo4jRuleList = new ArrayList<>();
 
         for (DroolsRule droolsRule : ruleList){
-            neo4jRuleList.add(droolsRuleToNeojRule(droolsRule));
+            neo4jRuleList.add(this.droolsRuleToNeojRule(droolsRule));
         }
+
+
 
         return neo4jRuleList;
     }
 
 
+    private Neo4jLeftHandSide lhsDroolsToLhsNeo4j(LeftHandSide leftHandSide){
 
-    private Set<Neo4jAttribute> attributeDroolsToAttributeNeo4j(Attribute attribute){
+        Neo4jLeftHandSide neo4jLeftHandSide = new Neo4jLeftHandSide();
+        neo4jLeftHandSide.setIdUnique(leftHandSide.getIdUnique());
+        neo4jLeftHandSide.setLhsCondition(gson.toJson(leftHandSide.getLhsConditionList()));
 
-        List<String> attributeKeyValueList = attribute.getKeyValueList();
-        Set<Neo4jAttribute> attributeSet = new HashSet<>();
-
-        for (String keyValue : attributeKeyValueList) {
-            attributeSet.add(new Neo4jAttribute(keyValue));
-        }
-
-        return attributeSet;
+        return neo4jLeftHandSide;
     }
 
-    private Set<Neo4jMetadata> metadataDroolsToMetadataNeo4j(Metadata metadata){
 
-        List<String> metadataKeyValueList= metadata.getKeyValueList();
-        Set<Neo4jMetadata> metadataSet = new HashSet<>();
+    private Neo4jConsequence consequenceDroolsToConsequenceNeo4j(Consequence consequence){
 
-        for (String keyValue : metadataKeyValueList) {
-            metadataSet.add(new Neo4jMetadata(keyValue));
-        }
+        Neo4jConsequence neo4jConsequence = new Neo4jConsequence();
+        neo4jConsequence.setIdUnique(consequence.getIdUnique());
 
-        return metadataSet;
+        List<String> consequenceList = consequence.getKeyValueList();
+        String [] consequenceArray = consequenceList.toArray(new String[consequenceList.size()]);
+
+        neo4jConsequence.setConsequence(consequenceArray);
+
+        return neo4jConsequence;
     }
+
+
+//    private Set<Neo4jMetadata> metadataDroolsToMetadataNeo4j(Metadata metadata){
+//
+//        List<String> metadataKeyValueList= metadata.getKeyValueList();
+//        Set<Neo4jMetadata> metadataSet = new HashSet<>();
+//
+//        for (String keyValue : metadataKeyValueList) {
+//            metadataSet.add(new Neo4jMetadata(keyValue));
+//        }
+//
+//        return metadataSet;
+//    }
+
 }

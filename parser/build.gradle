@@ -14,5 +14,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.drools/drools-compiler
     compile group: 'org.drools', name: 'drools-compiler', version: '7.7.0.Final'
 
+    compile 'org.antlr:antlr4:4.7.1'
+    compile 'org.antlr:antlr4-runtime:4.7.1'
 
 }

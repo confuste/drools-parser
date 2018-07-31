@@ -1,5 +1,8 @@
 package drools.rule;
 
+import drools.rule.lhs.LeftHandSide;
+import drools.rule.rhs.Consequence;
+
 /**
  * Represents a rule and its properties
  */

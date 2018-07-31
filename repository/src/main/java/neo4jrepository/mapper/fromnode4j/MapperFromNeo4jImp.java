@@ -2,6 +2,8 @@ package neo4jrepository.mapper.fromnode4j;
 
 import com.google.gson.Gson;
 import drools.rule.*;
+import drools.rule.lhs.LeftHandSide;
+import drools.rule.rhs.Consequence;
 import neo4jrepository.neo4jmodel.Neo4jRule;
 
 
@@ -29,17 +31,17 @@ public class MapperFromNeo4jImp implements MapperFromNeo4j{
         droolsRule.setSalience(neo4jRule.getSalience());
 
         Attribute attribute = new Attribute();
-        attribute.setAttributeMap(neo4jRule.getKeyValueAttributeHashMap());
+//        attribute.setAttributeMap(neo4jRule.getKeyValueAttributeHashMap());
         droolsRule.setAttribute(attribute);
 
         Metadata metadata = new Metadata();
-        metadata.setMetadataMap(neo4jRule.getKeyValueMetadataHashMap());
+//        metadata.setMetadataMap(neo4jRule.getKeyValueMetadataHashMap());
         droolsRule.setMetadata(metadata);
 
-        LeftHandSide lhs = gson.fromJson(neo4jRule.getLeftHandSide(), LeftHandSide.class);
-        droolsRule.setLeftHandSide(lhs);
-
-        droolsRule.setConsequence(new Consequence(neo4jRule.getConsequence()));
+//        LeftHandSide lhs = gson.fromJson(neo4jRule.getLeftHandSide(), LeftHandSide.class);
+//        droolsRule.setLeftHandSide(lhs);
+//
+//        droolsRule.setConsequence(new Consequence(neo4jRule.getConsequence()));
 
         return droolsRule;
     }

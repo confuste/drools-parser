@@ -1,13 +1,12 @@
-package drools.rule;
+package drools.rule.lhs;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Represents a condition of a Rule Left Hand Side.
  * It has the id, the object type and the constraint list.
  */
-public class LhsCondition {
+public class LhsCondition implements Comparator<LhsCondition>{
 
 
     private String id;
@@ -45,5 +44,26 @@ public class LhsCondition {
     public void addConstraint(String constraint){
         this.constraintList.add(constraint);
     }
+
+
+    @Override
+    public int compare(LhsCondition o1, LhsCondition o2) {
+        return o1.id.compareTo(o2.id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LhsCondition that = (LhsCondition) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (objectType != null ? !objectType.equals(that.objectType) : that.objectType != null) return false;
+
+
+        return constraintList != null ? (new HashSet<>(this.constraintList).equals(new HashSet<>(that.constraintList))) : that.constraintList == null;
+    }
+
 
 }

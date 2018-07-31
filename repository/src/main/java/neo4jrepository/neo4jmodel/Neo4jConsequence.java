@@ -2,38 +2,39 @@ package neo4jrepository.neo4jmodel;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
+import org.neo4j.ogm.annotation.NodeEntity;
 
 /**
  * Created by alex on 16/7/18.
  */
+@NodeEntity(label="RHS")
 public class Neo4jConsequence {
 
     @Id
-    @GeneratedValue
-    private Long id;
-    private String consequence;
+    private int idUnique;
+    private String [] consequence;
 
     public Neo4jConsequence(){
 
     }
 
-    public Neo4jConsequence(String consequence) {
-        this.consequence = consequence;
+    public Neo4jConsequence(int id) {
+        this.idUnique = id;
     }
 
-    public Long getId() {
-        return id;
+    public int getIdUnique() {
+        return idUnique;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdUnique(int idUnique) {
+        this.idUnique = idUnique;
     }
 
-    public String getConsequence() {
+    public String [] getConsequence() {
         return consequence;
     }
 
-    public void setConsequence(String consequence) {
+    public void setConsequence(String [] consequence) {
         this.consequence = consequence;
     }
 }
