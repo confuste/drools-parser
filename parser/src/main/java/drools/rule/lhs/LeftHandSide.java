@@ -44,12 +44,13 @@ public class LeftHandSide {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         LeftHandSide that = (LeftHandSide) o;
 
-        return lhsConditionList != null ? (new HashSet<>(this.lhsConditionList).equals(new HashSet<>(that.lhsConditionList))) : that.lhsConditionList == null;
+        return lhsConditionList != null ? this.lhsConditionList.equals(that.lhsConditionList) : that.lhsConditionList == null;
     }
 
 }

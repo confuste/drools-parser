@@ -25,7 +25,7 @@ public class Main {
 
         String rulesTxt = "";
         try {
-            rulesTxt = FileUtils.readFile("the_drl_files/VAP.drl");
+            rulesTxt = FileUtils.readFile("the_drl_files/query_test.drl");
             //System.out.println(rulesTxt);
         } catch (IOException e) {
             e.printStackTrace();
@@ -54,8 +54,8 @@ public class Main {
             System.out.println("id: " + lhsCondition.getId() + ", objectType: " + lhsCondition.getObjectType()  + ", ConstraintList:" + lhsCondition.getConstraintList());
             */
 
-//            List<Neo4jRule> neo4jRuleList = convertModelToNeo4jModel(ruleList);
-//            initOGMneo4j(neo4jRuleList);
+            List<Neo4jRule> neo4jRuleList = convertModelToNeo4jModel(ruleList);
+            initOGMneo4j(neo4jRuleList);
 
             System.out.println("----------------");
 
@@ -122,19 +122,21 @@ public class Main {
         SessionFactory sessionFactory = new SessionFactory(configuration, neo4jrepository.Configuration.NEO4J_MODEL_PACKAGE);
         Session session = sessionFactory.openSession();
 
-        /*
+
         for(Neo4jRule neo4jRule : neo4jRuleList){
-            session.save(neo4jRule);
-        }
-        */
-
-
-
-        for (int i = 0; i < 3; i++) {
             session.beginTransaction();
-            session.save(neo4jRuleList.get(i));
+            session.save(neo4jRule);
             session.getTransaction().commit();
         }
+
+
+
+
+//        for (int i = 0; i < 3; i++) {
+//            session.beginTransaction();
+//            session.save(neo4jRuleList.get(i));
+//            session.getTransaction().commit();
+//        }
 
 
 

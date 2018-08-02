@@ -53,6 +53,9 @@ public class LhsCondition implements Comparator<LhsCondition>{
 
     @Override
     public boolean equals(Object o) {
+
+        System.out.println("EQUALS PASA POR AQUI 2?");
+
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -60,7 +63,6 @@ public class LhsCondition implements Comparator<LhsCondition>{
 
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
         if (objectType != null ? !objectType.equals(that.objectType) : that.objectType != null) return false;
-
 
         return constraintList != null ? (new HashSet<>(this.constraintList).equals(new HashSet<>(that.constraintList))) : that.constraintList == null;
     }

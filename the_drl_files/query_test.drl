@@ -1,0 +1,14 @@
+rule "Rule_1"
+    when
+        $patient: Patient (temperature > 36.5 && temperature <= 38.4)
+    then
+        modify ($patient) {CPIS +=0};
+end
+
+rule "Rule2"
+    when
+        $patient: Patient (temperature > 36.5 && temperature <= 38.4)
+    then
+        remove ($patient) {CPIS +=0};
+end
+

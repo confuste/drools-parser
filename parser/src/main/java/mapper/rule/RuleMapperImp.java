@@ -143,17 +143,14 @@ public class RuleMapperImp implements RuleMapper {
 
             for(int j = i+1; j < droolsRuleList.size(); j++) {
 
-                //System.out.println("["+i+", " +j+"] @ ");
 
                 leftHandSide_j = droolsRuleList.get(j).getLeftHandSide();
                 consequence_j = droolsRuleList.get(j).getConsequence();
 
-                //System.out.println("isEqual LHS? " + leftHandSide_i.equals(leftHandSide_j));
                 if(leftHandSide_j.getIdUnique() == 0 && leftHandSide_i.equals(leftHandSide_j)){
                     leftHandSide_j.setIdUnique(leftHandSide_i.getIdUnique());
                 }
 
-                //System.out.println("isEqual ? " + leftHandSide_i.equals(leftHandSide_j));
                 if(consequence_j.getIdUnique() == 0 && consequence_i.equals(consequence_j)){
                     consequence_j.setIdUnique(consequence_i.getIdUnique());
                 }
