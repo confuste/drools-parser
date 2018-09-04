@@ -54,8 +54,6 @@ public class LhsCondition implements Comparator<LhsCondition>{
     @Override
     public boolean equals(Object o) {
 
-        System.out.println("EQUALS PASA POR AQUI 2?");
-
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 

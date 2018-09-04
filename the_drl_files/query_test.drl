@@ -1,14 +1,61 @@
-rule "Rule_1"
+rule "R1"
+    when
+        $patient: Patient (temperature > 36.5 && temperature <= 38.4)
+    then
+        insertLogical (new Diagnosis($patient,"VAP unlikely"));
+
+end
+
+
+rule "R2"
+    when
+        $patient: Patient (temperature > 36.9 && temperature <= 38.4)
+    then
+        remove ($patient) {CPIS +=0};
+end
+
+rule "R3"
+    when
+        $treatment: Treatment  (temperature > 40 && temperature <= 38.4)
+    then
+        remove ($treatment) {CPIS +=0};
+end
+
+rule "R4"
     when
         $patient: Patient (temperature > 36.5 && temperature <= 38.4)
     then
         modify ($patient) {CPIS +=0};
 end
 
-rule "Rule2"
+rule "R5"
     when
-        $patient: Patient (temperature > 36.5 && temperature <= 38.4)
+        $treatment: Treatment (patient == $patient)
     then
-        remove ($patient) {CPIS +=0};
+        modify ($treatment) {CPIS +=0};
 end
+
+rule "R6"
+    when
+        $treatment: Treatment (patient == $patient)
+    then
+        modify ($treatment) {CPIS +=0};
+end
+
+
+rule "R7"
+    when
+        $treatment: Treatment (pat == $patient)
+    then
+        modify ($treatment) {CPIS +=4};
+end
+
+
+rule "R8"
+    when
+        $treatment: Treatment (patient == $patient)
+    then
+        modify ($treatment) {CPIS +=0};
+end
+
 
